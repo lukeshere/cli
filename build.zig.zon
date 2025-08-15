@@ -1,0 +1,16 @@
+.{
+    .name = .playground,
+
+    .version = "0.0.0",
+
+    .fingerprint = 0xdc1888487d9a6fd4,
+
+    .minimum_zig_version = "0.15.0-dev.1517+d62515835",
+
+    .dependencies = .{},
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+    },
+}
