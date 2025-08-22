@@ -8,20 +8,37 @@ const Byte = u8;
 const Slice = []const Byte;
 const Slices = []const Slice;
 
+var stdout_buffer: [1024]u8 = undefined;
+var stdout: ?*std.Io.Writer = null;
+
+pub fn stdOutPrint(comptime fmt: []const u8, args: anytype, flush: bool) *std.Io.Writer {
+    if (stdout) |out| {
+        // out.print(fmt, args) catch {};
+        // if (flush) out.flush() catch {};
+        _ = out;
+        _ = flush;
+        std.debug.print(fmt, args);
+    } else {
+        var stdout_writer = std.fs.File.stdout().writer(&stdout_buffer);
+        stdout = &(stdout_writer.interface);
+    }
+    return stdout.?;
+}
+
 pub const Command = struct {
-    name: Slice, // Name of the command
-    func: fnType, // Function to execute the command
-    req: Slices = &.{}, // Required options
-    opt: Slices = &.{}, // Optional options
+    name: Slice,
+    func: fnType,
+    req: Slices = &.{},
+    opt: Slices = &.{},
     const fnType = *const fn ([]const Option) bool;
 };
 
 pub const Option = struct {
-    name: Slice, // Name of the option
-    func: ?fnType = null, // Function to execute the option
-    short: Byte, // Short form, e.g., -n|-N
-    long: Slice, // Long form, e.g., --name
-    value: Slice = "", // Value of the option
+    name: Slice,
+    func: ?fnType = null,
+    short: Byte,
+    long: Slice,
+    value: Slice = "",
     const fnType = *const fn (Slice) bool;
 };
 
@@ -159,7 +176,7 @@ pub const Color = enum {
 };
 
 pub fn printColored(color: Color, comptime fmt: []const u8, args: anytype) void {
-    std.debug.print("{s}" ++ fmt ++ "{s}", .{color.ansiCode()} ++ args ++ .{Color.Reset.ansiCode()});
+    _ = stdOutPrint("{s}" ++ fmt ++ "{s}", .{color.ansiCode()} ++ args ++ .{Color.Reset.ansiCode()}, true);
 }
 
 pub const Spinner = struct {
@@ -178,28 +195,12 @@ pub const Spinner = struct {
     }
 
     pub fn tick(self: *Spinner) !void {
-        // var buffer: [1024]u8 = undefined;
-        // var writer = std.fs.File.stdout().writer(buffer[0..]).interface;
-        // try std.Io.Writer.print(
-        //     &writer, 
-        //     "\r{s} {s}", 
-        //     .{ self.frames[self.current], self.message }
-        // );
-        std.debug.print("\r{s} {s}",  .{self.frames[self.current], self.message});
+        _ = stdOutPrint("\r{s} {s}", .{ self.frames[self.current], self.message }, true);
         self.current = (self.current + 1) % self.frames.len;
     }
 
     pub fn stop(self: *Spinner, message: []const u8) !void {
         _ = self;
-
-        // var buffer: [1024]u8 = undefined;
-        // var writer = std.fs.File.stdout().writer(buffer[0..]).interface;
-        //         try std.Io.Writer.print(
-        //     &writer, 
-        //     "\r✓ {s}\n", 
-        //     .{ message }
-        // );
-
-        std.debug.print("\r✓ {s}\n",  .{message});
+        _ = stdOutPrint("\r✓ {s}\n", .{message}, true);
     }
 };

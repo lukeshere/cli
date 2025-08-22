@@ -1,11 +1,11 @@
 .{
-    .name = .playground,
+    .name = .cli,
 
     .version = "0.0.0",
 
-    .fingerprint = 0xdc1888487d9a6fd4,
+    .fingerprint = 0x48f6513c99c3abc9,
 
-    .minimum_zig_version = "0.15.0-dev.1517+d62515835",
+    .minimum_zig_version = "0.15.1",
 
     .dependencies = .{},
     .paths = .{
