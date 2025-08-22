@@ -4,7 +4,7 @@ const cli = @import("cli.zig");
 pub const methods = struct {
     pub const commands = struct {
         pub fn helloFn(_options: []const cli.Option) bool {
-            var greeting: []const u8 = undefined;
+            var greeting: []const u8 = "undefined";
             var name: []const u8 = "World";
 
             for (_options) |opt| {

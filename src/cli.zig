@@ -9,20 +9,12 @@ const Slice = []const Byte;
 const Slices = []const Slice;
 
 var stdout_buffer: [1024]u8 = undefined;
-var stdout: ?*std.Io.Writer = null;
 
-pub fn stdOutPrint(comptime fmt: []const u8, args: anytype, flush: bool) *std.Io.Writer {
-    if (stdout) |out| {
-        // out.print(fmt, args) catch {};
-        // if (flush) out.flush() catch {};
-        _ = out;
-        _ = flush;
-        std.debug.print(fmt, args);
-    } else {
-        var stdout_writer = std.fs.File.stdout().writer(&stdout_buffer);
-        stdout = &(stdout_writer.interface);
-    }
-    return stdout.?;
+pub fn print(comptime fmt: []const u8, args: anytype) void {
+    var stdout_writer = std.fs.File.stdout().writer(&stdout_buffer);
+    var stdout = &stdout_writer.interface;
+    stdout.print(fmt, args) catch {};
+    stdout.flush() catch {};
 }
 
 pub const Command = struct {
@@ -176,7 +168,7 @@ pub const Color = enum {
 };
 
 pub fn printColored(color: Color, comptime fmt: []const u8, args: anytype) void {
-    _ = stdOutPrint("{s}" ++ fmt ++ "{s}", .{color.ansiCode()} ++ args ++ .{Color.Reset.ansiCode()}, true);
+    _ = print("{s}" ++ fmt ++ "{s}", .{color.ansiCode()} ++ args ++ .{Color.Reset.ansiCode()});
 }
 
 pub const Spinner = struct {
@@ -195,12 +187,12 @@ pub const Spinner = struct {
     }
 
     pub fn tick(self: *Spinner) !void {
-        _ = stdOutPrint("\r{s} {s}", .{ self.frames[self.current], self.message }, true);
+        _ = print("\r{s} {s}", .{ self.frames[self.current], self.message });
         self.current = (self.current + 1) % self.frames.len;
     }
 
     pub fn stop(self: *Spinner, message: []const u8) !void {
         _ = self;
-        _ = stdOutPrint("\r✓ {s}\n", .{message}, true);
+        _ = print("\r✓ {s}\n", .{message});
     }
 };
